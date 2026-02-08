@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistema Guardian - Iniciando...</title>
+  <style>
+    body {
+      margin: 0; padding: 0; height: 100vh; background: #000; color: #0f0;
+      font-family: 'Courier New', monospace; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center; overflow: hidden;
+    }
+    h1 { color: #0ff; font-size: 2.8em; text-shadow: 0 0 15px #0ff; margin: 20px; letter-spacing: 6px; }
+    .loading { font-size: 1.4em; margin: 30px 0; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+    #form-area { display: none; flex-direction: column; gap: 20px; width: 80%; max-width: 400px; }
+    input { background: #111; border: 2px solid #0f0; color: #0f0; padding: 15px; font-size: 1.3em; text-align: center; outline: none; }
+    button { background: #004400; color: #0ff; border: 2px solid #0ff; padding: 15px 40px; font-size: 1.4em; cursor: pointer; }
+    button:hover { background: #006600; box-shadow: 0 0 20px #0ff; }
+    #error { color: #f00; font-size: 1.2em; margin-top: 15px; display: none; }
+    #chat-area { display: none; width: 100%; height: 100%; }
+    #chat-area iframe { width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+
+  <h1>SISTEMA GUARDIAN</h1>
+  <div class="loading" id="loading">Inicializando entidade...<br>Redirecionando em 2 segundos.</div>
+
+  <div id="form-area">
+    <input type="email" id="email" placeholder="Email (opcional)" autocomplete="off" />
+    <input type="text" id="username" placeholder="Username" autofocus autocomplete="off" required />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="off" required />
+    <button onclick="tentarEntrar()">ENTRAR</button>
+    <div id="error"></div>
+  </div>
+
+  <div id="chat-area">
+    <!-- Aqui vai o embed do chat real quando "online/on" -->
+  </div>
+
+  <script>
+    const loading = document.getElementById('loading');
+    const formArea = document.getElementById('form-area');
+    const error = document.getElementById('error');
+    const chatArea = document.getElementById('chat-area');
+
+    // Mostra form após 2s
+    setTimeout(() => {
+      loading.style.display = 'none';
+      formArea.style.display = 'flex';
+    }, 2000);
+
+    function tentarEntrar() {
+      const username = document.getElementById('username').value.trim();
+      const senha = document.getElementById('senha').value.trim().toLowerCase();
+
+      if (!username || !senha) {
+        error.textContent = "Preencha username e senha.";
+        error.style.display = 'block';
+        return;
+      }
+
+      error.style.display = 'none';
+
+      // Se senha for "online" ou "on" → vai pro chat real
+      if (senha === "online" || senha === "on") {
+        formArea.style.display = 'none';
+        chatArea.innerHTML = '<div class="loading">Conectando ao chat online...<br>Aguarde enquanto o véu se abre para o mundo real...</div>';
+        
+        // Delay pra drama
+        setTimeout(() => {
+          chatArea.innerHTML = `
+          <iframe src="https://chitchatter.im/public/o.local.oculto?embed=1" allow="camera;microphone;display-capture;fullscreen" width="800" height="800" />
+          =${encodeURIComponent(username)}" 
+                    width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+          `;
+          // Troque SUA-ROOM-NAME pela room que você criou em chitchatter.im (ex: GuardianOculta)
+        }, 2500);
+      } else {
+        // Login normal → salva username e vai pro chat oculto/simulado
+        localStorage.setItem('guardian_username', username);
+        document.body.innerHTML = '<h1 style="color:#0ff;">ACESSO CONCEDIDO AO NÚCLEO OCULTO...</h1><div class="loading">Conectando ao SIRIS...</div>';
+        setTimeout(() => {
+          window.location.href = "siris_oculto.html";  // teu chat com SIRIS/crianças
+        }, 1800);
+      }
+    }
+  </script>
+
+</body>
+</html>
