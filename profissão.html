@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Oculto - Trabalho</title>
+
+<style>
+
+body{
+background:black;
+color:#00ffcc;
+font-family:monospace;
+text-align:center;
+padding:20px;
+}
+
+/* TIMER */
+
+#timer{
+font-size:32px;
+margin-bottom:10px;
+}
+
+/* BOTÕES */
+
+.caixa{
+border:2px solid #00ffcc;
+padding:12px;
+margin:8px;
+display:inline-block;
+cursor:pointer;
+}
+
+.caixa:hover{
+background:#00ffcc;
+color:black;
+}
+
+/* BARRA */
+
+#barraContainer{
+width:90%;
+height:25px;
+border:2px solid #00ffcc;
+margin:10px auto;
+}
+
+#barra{
+width:100%;
+height:100%;
+background:#00ffcc;
+}
+
+/* OCULTAR */
+
+#info,#confirmar,#trabalhar,#jogo,#vitoria{
+display:none;
+}
+
+/* TREMER */
+
+.tremer{
+animation: tremerTela 0.1s infinite;
+}
+
+@keyframes tremerTela{
+
+0%{transform:translate(5px,5px);}
+25%{transform:translate(-5px,5px);}
+50%{transform:translate(5px,-5px);}
+75%{transform:translate(-5px,-5px);}
+100%{transform:translate(0px,0px);}
+
+}
+
+</style>
+</head>
+<body>
+
+<h2>Escolha sua profissão</h2>
+
+<div id="profissoes">
+
+<div class="caixa" onclick="escolher('medico')">[MÉDICO]</div>
+
+<div class="caixa" onclick="escolher('mecanico')">[MECÂNICO]</div>
+
+<div class="caixa" onclick="escolher('soldado')">[SOLDADO]</div>
+
+</div>
+
+<div id="info"></div>
+
+<div id="confirmar">
+<div class="caixa" onclick="confirmar()">CONFIRMAR</div>
+</div>
+
+<div id="trabalhar">
+
+<h3>Trabalhar?</h3>
+
+<div class="caixa" onclick="iniciar()">[SIM]</div>
+<div class="caixa" onclick="recusar()">[NÃO]</div>
+
+</div>
+
+<div id="jogo">
+
+<div id="timer">01:00</div>
+
+<h3>RESPIRAÇÃO</h3>
+
+<div id="barraContainer">
+<div id="barra"></div>
+</div>
+
+<p id="respTexto">100%</p>
+
+<div id="acoes"></div>
+
+<p id="mensagem"></p>
+
+</div>
+
+<div id="vitoria">
+
+<h2>PARABÉNS</h2>
+
+<p>
+Você completou seu primeiro trabalho.<br><br>
+Recebeu 50 CARDS.
+</p>
+
+</div>
+
+<script>
+
+let profissao="";
+let respiracao=100;
+let tempo=60;
+let loop;
+
+/* ESCOLHER */
+
+function escolher(p){
+
+profissao=p;
+
+document.getElementById("info").innerHTML=
+"<h3>"+p.toUpperCase()+"</h3>";
+
+document.getElementById("info").style.display="block";
+document.getElementById("confirmar").style.display="block";
+
+}
+
+/* CONFIRMAR */
+
+function confirmar(){
+
+document.getElementById("profissoes").style.display="none";
+document.getElementById("confirmar").style.display="none";
+document.getElementById("trabalhar").style.display="block";
+
+}
+
+/* INICIAR */
+
+function iniciar(){
+
+document.getElementById("trabalhar").style.display="none";
+document.getElementById("jogo").style.display="block";
+
+criarAcoes();
+
+loop=setInterval(timer,1000);
+
+}
+
+/* AÇÕES POR PROFISSÃO */
+
+function criarAcoes(){
+
+let acoes=document.getElementById("acoes");
+
+if(profissao=="medico"){
+
+acoes.innerHTML=`
+<div class="caixa" onclick="acao()">[ESTUDAR]</div>
+<div class="caixa" onclick="acao()">[ANALISAR]</div>
+<div class="caixa" onclick="acao()">[ESCONDER]</div>
+`;
+
+}
+
+if(profissao=="mecanico"){
+
+acoes.innerHTML=`
+<div class="caixa" onclick="acao()">[REPARAR]</div>
+<div class="caixa" onclick="acao()">[DESTRUIR]</div>
+`;
+
+}
+
+if(profissao=="soldado"){
+
+acoes.innerHTML=`
+<div class="caixa" onclick="acao()">[ALIMENTAR]</div>
+<div class="caixa" onclick="acao()">[PROCURAR]</div>
+<div class="caixa" onclick="acao()">[ELIMINAR]</div>
+`;
+
+}
+
+}
+
+/* TIMER */
+
+function timer(){
+
+let min=Math.floor(tempo/60);
+let seg=tempo%60;
+
+document.getElementById("timer").innerText=
+(min<10?"0"+min:min)+":"+(seg<10?"0"+seg:seg);
+
+tempo--;
+
+if(tempo<0){
+
+vitoria();
+
+}
+
+}
+
+/* AÇÃO */
+
+function acao(){
+
+let sucesso=Math.random()<0.5;
+
+if(sucesso){
+
+msg("SUCESSO");
+
+}else{
+
+msg("ERRO");
+
+respiracao-=15;
+
+if(respiracao<0)respiracao=0;
+
+atualizarResp();
+
+}
+
+}
+
+/* RESP */
+
+function atualizarResp(){
+
+document.getElementById("barra").style.width=
+respiracao+"%";
+
+document.getElementById("respTexto").innerText=
+respiracao+"%";
+
+if(respiracao<=0){
+
+morrer();
+
+}
+
+}
+
+/* MORRER */
+
+function morrer(){
+
+clearInterval(loop);
+
+/* TREMER */
+document.body.classList.add("tremer");
+
+/* GRITO */
+let ctx=new AudioContext();
+let osc=ctx.createOscillator();
+let gain=ctx.createGain();
+
+osc.connect(gain);
+gain.connect(ctx.destination);
+
+osc.type="sawtooth";
+osc.frequency.setValueAtTime(900,ctx.currentTime);
+
+osc.start();
+
+setTimeout(()=>{
+
+osc.stop();
+
+document.body.classList.remove("tremer");
+
+document.body.innerHTML=
+"<h1 style='color:red'>VOCÊ MORREU</h1>";
+
+},2000);
+
+}
+
+/* VITORIA */
+
+function vitoria(){
+
+clearInterval(loop);
+
+document.getElementById("jogo").style.display="none";
+document.getElementById("vitoria").style.display="block";
+
+}
+
+/* MSG */
+
+function msg(t){
+
+document.getElementById("mensagem").innerText=t;
+
+}
+
+/* RECUSAR */
+
+function recusar(){
+
+msg("Guardian observou sua recusa.");
+
+}
+
+</script>
+
+</body>
+</html>
